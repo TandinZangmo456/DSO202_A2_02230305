@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: db
   namespace: dso202-assignment-02
@@ -8,13 +8,20 @@ metadata:
     app.kubernetes.io/part-of: task-tracker
     tier: database
 spec:
-  replicas: 1
-  strategy:
-    type: Recreate            # a ReadWriteOnce volume must not be shared by two Pods during a rollout
+  serviceName: db-svc            # the existing headless Service gives db-0 a stable DNS name
+  replicas: 1                    # identity and storage only; Postgres replication is not provided by Kubernetes
+  podManagementPolicy: OrderedReady
   selector:
     matchLabels:
       app.kubernetes.io/name: db
       tier: database
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain          # keep the data if the StatefulSet is deleted
+    whenScaled: Retain           # keep the data if replicas are reduced
   template:
     metadata:
       labels:
@@ -25,10 +32,11 @@ spec:
       containers:
         - name: postgres
           image: sarojsanyasi/dso202-db:1.0
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5432
+              name: postgres
           env:
-            # The official postgres image expects POSTGRES_*, not DB_*
             - name: POSTGRES_DB
               valueFrom:
                 configMapKeyRef:
@@ -52,9 +60,14 @@ spec:
               cpu: 500m
               memory: 512Mi
           volumeMounts:
-            - name: db-data
+            - name: data
               mountPath: /var/lib/postgresql/data
-      volumes:
-        - name: db-data
-          persistentVolumeClaim:
-            claimName: db-pvc
+  volumeClaimTemplates:          # one PVC per replica, named data-db-<ordinal>
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: standard
+        resources:
+          requests:
+            storage: 1Gi
