@@ -20,6 +20,7 @@ spec:
         app.kubernetes.io/part-of: task-tracker
         tier: frontend
     spec:
+      serviceAccountName: frontend-sa
       containers:
         - name: frontend
           image: sarojsanyasi/dso202-frontend:1.0

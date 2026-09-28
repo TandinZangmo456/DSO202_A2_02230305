@@ -29,6 +29,7 @@ spec:
         app.kubernetes.io/part-of: task-tracker
         tier: database
     spec:
+      serviceAccountName: db-sa
       containers:
         - name: postgres
           image: sarojsanyasi/dso202-db:1.0
