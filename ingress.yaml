@@ -7,6 +7,10 @@ metadata:
     app.kubernetes.io/part-of: task-tracker
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+        - tasktracker.localtest.me
+      secretName: tasktracker-tls
   rules:
     - host: tasktracker.localtest.me
       http:

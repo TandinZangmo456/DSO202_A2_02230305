@@ -15,4 +15,4 @@ data:
   # Database (official postgres image naming)
   POSTGRES_DB: "tasktracker"         # must equal DB_NAME
   # Frontend
-  BACKEND_URL: "http://tasktracker.localtest.me"
+  BACKEND_URL: "https://tasktracker.localtest.me"
