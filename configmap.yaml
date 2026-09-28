@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: dso202-assignment-02
+  labels:
+    app.kubernetes.io/part-of: task-tracker
+data:
+  # Backend (application naming)
+  DB_HOST: "db-svc"                  # must equal the database Service name
+  DB_PORT: "5432"
+  DB_NAME: "tasktracker"             # must equal POSTGRES_DB
+  APP_PORT: "8080"
+  CORS_ORIGIN: "*"
+  # Database (official postgres image naming)
+  POSTGRES_DB: "tasktracker"         # must equal DB_NAME
+  # Frontend
+  BACKEND_URL: "http://backend-svc:8080"

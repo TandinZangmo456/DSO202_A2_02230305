@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: assignment-quota
+  namespace: dso202-assignment-02
+  labels:
+    app.kubernetes.io/part-of: task-tracker
+spec:
+  hard:
+    requests.cpu: "500m"            # steady state 175m, leaves room for surge Pods
+    requests.memory: 1Gi            # steady state 352Mi
+    limits.cpu: "2"                 # steady state 850m, plus surge Pods
+    limits.memory: 1536Mi           # steady state 704Mi, plus surge Pods
+    pods: "10"                      # 3 running, plus rollout or self-healing overlap
+    persistentvolumeclaims: "2"     # only the database needs one
+    requests.storage: 2Gi           # db-pvc is 1Gi
+    services.nodeports: "1"         # only the frontend may be a NodePort
+    services.loadbalancers: "0"     # nothing may be a LoadBalancer
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: assignment-limits
+  namespace: dso202-assignment-02
+  labels:
+    app.kubernetes.io/part-of: task-tracker
+spec:
+  limits:
+    - type: Container
+      defaultRequest:               # applied if a container omits requests
+        cpu: 50m
+        memory: 64Mi
+      default:                      # applied if a container omits limits
+        cpu: 200m
+        memory: 128Mi
+      min:
+        cpu: 10m
+        memory: 16Mi
+      max:                          # the database is the largest container
+        cpu: 500m
+        memory: 512Mi

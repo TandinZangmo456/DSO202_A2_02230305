@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: dso202-assignment-02
+  labels:
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/part-of: task-tracker
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: backend
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: backend
+        app.kubernetes.io/part-of: task-tracker
+        tier: backend
+    spec:
+      containers:
+        - name: backend
+          image: sarojsanyasi/dso202-backend:1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            # The backend uses DB_*, not POSTGRES_*
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: DB_PORT
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: DB_NAME
+            - name: APP_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: APP_PORT
+            - name: CORS_ORIGIN
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: CORS_ORIGIN
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secret
+                  key: DB_PASSWORD
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
