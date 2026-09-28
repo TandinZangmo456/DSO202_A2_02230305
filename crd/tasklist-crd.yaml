@@ -1,0 +1,46 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: tasklists.tasktracker.dso202.io     # must be <plural>.<group>
+spec:
+  group: tasktracker.dso202.io
+  scope: Namespaced
+  names:
+    kind: TaskList
+    listKind: TaskListList
+    plural: tasklists
+    singular: tasklist
+    shortNames: ["tl"]
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required: ["environment", "frontendReplicas", "backendReplicas"]
+              properties:
+                environment:
+                  type: string
+                  enum: ["dev", "staging", "prod"]
+                frontendReplicas:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                backendReplicas:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                databaseStorage:
+                  type: string
+                  pattern: '^[0-9]+(Mi|Gi)$'
+                host:
+                  type: string
+      additionalPrinterColumns:
+        - {name: Environment, type: string,  jsonPath: .spec.environment}
+        - {name: Frontend,    type: integer, jsonPath: .spec.frontendReplicas}
+        - {name: Backend,     type: integer, jsonPath: .spec.backendReplicas}
+        - {name: Age,         type: date,    jsonPath: .metadata.creationTimestamp}

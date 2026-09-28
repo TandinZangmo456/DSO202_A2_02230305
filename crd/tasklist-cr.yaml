@@ -1,0 +1,11 @@
+apiVersion: tasktracker.dso202.io/v1
+kind: TaskList
+metadata:
+  name: tasktracker-config
+  namespace: dso202-assignment-02
+spec:
+  environment: dev
+  frontendReplicas: 1
+  backendReplicas: 1
+  databaseStorage: 1Gi
+  host: tasktracker.localtest.me
